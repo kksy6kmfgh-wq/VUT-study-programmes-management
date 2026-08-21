@@ -479,3 +479,234 @@ that transition.
 8. The architecture preserves institutional memory and allows reconstruction
     of which version was assessed, by whom, under which regime, with what
     findings, actions and decisions.
+
+## 15. Shared quality-management core
+
+The following concepts form a reusable quality-management core for
+AccreditationProcess, QualityReview and future quality processes. They are
+not accreditation-specific and support the complete chain:
+
+```text
+REQUIREMENT
+    -> EVIDENCE
+    -> ASSESSMENT
+    -> FINDING
+    -> ACTION
+    -> VERIFICATION
+    -> CLOSURE
+```
+
+### Requirement
+
+Requirement represents a structured, identifiable quality requirement. It is
+reusable across processes and versionable so that historical assessments can
+refer to the requirement definition that was valid at the time.
+
+Conceptual fields:
+
+- `id`
+- `code`
+- `requirement_type`
+- `title`
+- `description`
+- `valid_from`
+- `valid_to`
+- `version`
+
+The initial requirement types are:
+
+- `G` - programme guarantor or checklist requirement,
+- `H` - review-panel assessment item,
+- `R` - RVH decision item,
+- `PR` - process requirement.
+
+Requirements must not be hard-coded directly into accreditation or
+programme-quality models.
+
+### Evidence
+
+Evidence represents information or an artefact used to demonstrate, support
+or challenge fulfilment of a Requirement or another quality claim. It is a
+shared concept and is not owned exclusively by AccreditationProcess or
+QualityReview.
+
+Conceptual fields:
+
+- `id`
+- `evidence_type`
+- `title`
+- `description`
+- `source`
+- `reference`
+- `created_at`
+
+Evidence may later represent structured programme data, documents,
+curriculum maps, quality indicators, stakeholder feedback, meeting records
+or other auditable evidence. File storage is outside the scope of this
+conceptual model.
+
+Evidence may be associated with ProgrammeVersion, QualityReview,
+AccreditationProcess, QualityIndicator or other future quality contexts
+without duplicating the evidence record.
+
+### Assessment
+
+Assessment represents an evaluation of a Requirement in a specific context.
+The context remains flexible enough to support AccreditationProcess,
+QualityReview and future quality processes without creating separate
+assessment concepts for each process.
+
+Conceptual fields:
+
+- `id`
+- `requirement_id`
+- `context_type`
+- `context_id`
+- `assessor`
+- `result`
+- `comment`
+- `assessed_at`
+
+An Assessment may use one or more Evidence records. Detailed result enums
+are not defined yet.
+
+### Finding
+
+Finding represents a traceable outcome or observation arising from an
+Assessment, review, monitoring activity or another quality process.
+
+Conceptual fields:
+
+- `id`
+- `finding_type`
+- `title`
+- `description`
+- `source_context_type`
+- `source_context_id`
+- `created_at`
+- `status`
+
+A Finding may represent non-compliance, weakness, risk, strength, good
+practice or an improvement opportunity. Detailed `finding_type` and `status`
+enums are not defined yet.
+
+A Finding may arise from an Assessment, but the architecture also supports
+findings originating directly from a review or monitoring process.
+
+### Action
+
+Action represents a corrective, preventive or improvement action responding
+to a Finding or another approved improvement need.
+
+Conceptual fields:
+
+- `id`
+- `finding_id`
+- `title`
+- `description`
+- `responsible_party`
+- `due_at`
+- `status`
+- `created_at`
+- `completed_at`
+
+A Finding may have zero, one or multiple Actions. Actions must support
+traceable responsibility and deadlines. Detailed Action status enums are not
+defined yet.
+
+### Verification
+
+Verification records whether an Action was actually implemented and whether
+it was effective. These are conceptually distinct questions and must remain
+auditable independently.
+
+Conceptual fields:
+
+- `id`
+- `action_id`
+- `verifier`
+- `verified_at`
+- `implementation_verified`
+- `effectiveness_verified`
+- `comment`
+
+An Action may require one or more Verification records over time.
+Verification remains separate from Action so that implementation and
+effectiveness can be independently audited.
+
+### Closure
+
+Closure is not a separate entity yet. It is a controlled state reached only
+when the relevant Action or Actions and required Verification records
+demonstrate that the quality loop can be closed.
+
+The architecture must preserve the evidence and verification history after
+closure. Closing an issue must not erase its history.
+
+## 16. Shared quality-management relationships
+
+The core conceptual cardinalities are:
+
+```text
+Requirement
+    1:N
+Assessment
+
+Assessment
+    N:M
+Evidence
+
+Assessment
+    0:N
+Finding
+
+Finding
+    0:N
+Action
+
+Action
+    0:N
+Verification
+```
+
+The traceability chain is:
+
+```text
+Requirement
+    |
+Evidence
+    |
+Assessment
+    |
+Finding
+    |
+Action
+    |
+Verification
+    |
+Closure
+```
+
+This diagram represents traceability, not necessarily simple one-to-one
+database cardinality. In particular, one Assessment may use multiple
+Evidence records, Findings may arise from more than one source, and Actions
+and Verifications may occur in multiples over time.
+
+## 17. Shared quality-management principles
+
+1. Requirement, Evidence, Assessment, Finding, Action and Verification are
+   shared quality-management concepts.
+2. Accreditation and programme quality review reuse these concepts rather
+   than creating process-specific copies.
+3. Quality evidence remains traceable to its source.
+4. Findings remain traceable to the process, review, assessment or monitoring
+   context in which they arose.
+5. Actions have clear responsibility and deadlines.
+6. Closing an issue does not erase its history.
+7. Verification of implementation and verification of effectiveness are
+   conceptually distinct.
+8. The architecture supports institutional memory across successive
+   ProgrammeVersions and quality cycles.
+9. The system can reconstruct the chain Requirement -> Evidence ->
+   Assessment -> Finding -> Action -> Verification.
+10. The shared quality-management core remains usable beyond accreditation.

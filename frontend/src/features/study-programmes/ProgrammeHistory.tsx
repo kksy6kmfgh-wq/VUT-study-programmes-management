@@ -1,0 +1,3 @@
+import type { StudyProgramme } from '../../types/studyProgramme'
+
+export function ProgrammeHistory({ programme }: { programme: StudyProgramme }) { return <section className="section-panel"><div className="section-panel-header"><div><span className="eyebrow">AUDIT TRAIL</span><h2>Historie programu</h2><span className="section-caption">Chronologický přehled důležitých událostí</span></div></div><div className="history-list">{programme.history.map((event) => <article className="history-event" key={event.date + event.title}><time>{event.date}</time><div className="history-dot" /><div><strong>{event.title}</strong><span>{event.detail}</span></div></article>)}</div></section> }

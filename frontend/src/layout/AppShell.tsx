@@ -1,0 +1,8 @@
+import type { ReactNode } from 'react'
+
+type AppShellProps = { activeSection: string; onNavigate: (section: string) => void; children: ReactNode }
+const navigation = [['▦', 'Přehled'], ['◈', 'Studijní programy'], ['◇', 'Akreditace'], ['◌', 'Kvalita SP'], ['✓', 'Opatření'], ['◒', 'Dashboard kvality'], ['▱', 'Projekty']]
+
+export function AppShell({ activeSection, onNavigate, children }: AppShellProps) {
+  return <div className="app-shell"><header className="topbar"><div className="brand"><div className="brand-mark">V</div><div><div className="brand-title">VUT · Řízení kvality studijních programů</div><div className="brand-subtitle">Brno University of Technology · interní pracovní prostor</div></div></div><div className="user-area"><span className="user-name">Pavel Lošák</span><span className="user-avatar">PL</span></div></header><div className="app-body"><aside className="sidebar"><div className="nav-label">HLAVNÍ NAVIGACE</div><nav className="nav-list" aria-label="Hlavní navigace">{navigation.map(([icon, label]) => <button className={`nav-item ${activeSection === label ? 'active' : ''}`} key={label} type="button" onClick={() => onNavigate(label)}><span className="nav-icon" aria-hidden="true">{icon}</span>{label}</button>)}</nav><div className="sidebar-note"><strong>Centrální objekt</strong>Studijní program a jeho verze jsou základem pro akreditaci, kvalitu, data a opatření.</div></aside><main className="main-content">{children}</main></div></div>
+}

@@ -1,0 +1,3 @@
+import type { StudyProgramme } from '../../types/studyProgramme'
+
+export function ProgrammeDocuments({ programme }: { programme: StudyProgramme }) { return <section className="section-panel"><div className="section-panel-header"><div><span className="eyebrow">EVIDENCE & DOCUMENTS</span><h2>Dokumenty</h2><span className="section-caption">Lehký přehled auditable artefaktů programu</span></div></div><div className="document-grid">{programme.documents.map((document) => <article className="document-card" key={document.title}><span className="document-icon">▤</span><div><h3>{document.title}</h3><span>{document.type}</span><small>Aktualizováno {document.updatedAt}</small></div></article>)}</div></section> }

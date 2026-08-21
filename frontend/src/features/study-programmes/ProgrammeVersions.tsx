@@ -1,0 +1,13 @@
+import { useState } from 'react'
+import type { ProgrammeVersion, StudyProgramme } from '../../types/studyProgramme'
+import { StatusBadge } from '../../components/StatusBadge'
+
+export function ProgrammeVersions({ programme }: { programme: StudyProgramme }) {
+  const [selectedVersion, setSelectedVersion] = useState(3)
+  const version = programme.versions.find((item) => item.version === selectedVersion) ?? programme.versions[0]
+  return <div className="version-layout"><section className="section-panel"><div className="section-panel-header"><div><h2>Verze programu</h2><span className="section-caption">Jedna identita programu, více verzovaných podob</span></div><span className="section-caption">{programme.versions.length} záznamy</span></div><div className="version-list">{programme.versions.map((item) => <VersionRow key={item.version} version={item} selected={selectedVersion === item.version} onSelect={() => setSelectedVersion(item.version)} />)}</div><p className="version-note"><strong>Architektura:</strong> Verze 4 je připravovaná budoucí podoba stejného programu. Nejde o nový provozní program.</p></section><section className="section-panel version-detail"><span className="eyebrow">DETAIL VERZE</span><div className="version-detail-heading"><h2>ProgrammeVersion {version?.version}</h2><StatusBadge status={version?.status ?? 'DRAFT'} /></div><dl className="detail-list"><div><dt>Identita programu</dt><dd>{programme.name} <span>{programme.code} · {programme.faculty}</span></dd></div><div><dt>Stav životního cyklu</dt><dd>{version?.status === 'ACTIVE' ? 'Aktivní realizovaná verze' : version?.status === 'DRAFT' ? 'Připravovaná budoucí verze' : 'Historická verze'}</dd></div><div><dt>Platnost od</dt><dd>{version?.validFrom ?? version?.effectiveAcademicYear ?? 'Neuvedeno'}</dd></div><div><dt>Platnost do</dt><dd>{version?.validTo ?? 'Otevřená platnost'}</dd></div><div><dt>Akademický rok</dt><dd>{version?.effectiveAcademicYear ?? version?.plannedEffectiveAcademicYear ?? 'Neuvedeno'}</dd></div></dl></section></div>
+}
+
+function VersionRow({ version, selected, onSelect }: { version: ProgrammeVersion; selected: boolean; onSelect: () => void }) {
+  return <button type="button" className={`version-row version-select ${selected ? 'selected' : ''} ${version.status === 'ACTIVE' ? 'version-highlight' : ''}`} onClick={onSelect}><span className="version-number">Verze {version.version}</span><span className="version-year">{version.effectiveAcademicYear ? `Platná od ${version.effectiveAcademicYear}` : version.plannedEffectiveAcademicYear ? `Plánovaná účinnost ${version.plannedEffectiveAcademicYear}` : 'Historická verze'}</span><StatusBadge status={version.status} /></button>
+}

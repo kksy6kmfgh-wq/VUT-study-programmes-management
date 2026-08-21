@@ -1,0 +1,16 @@
+import type { StudyProgramme } from '../../types/studyProgramme'
+import { StatusBadge } from '../../components/StatusBadge'
+
+const phases = ['DESIGN', 'APPROVAL', 'DELIVERY', 'MONITORING', 'REVIEW', 'IMPROVEMENT']
+
+function Metric({ label, value, teal = false }: { label: string; value: string; teal?: boolean }) {
+  return <div className="metric-card"><span className="metric-label">{label}</span><span className={`metric-value ${teal ? 'teal' : ''}`}>{value}</span></div>
+}
+
+export function ProgrammeOverview({ programme }: { programme: StudyProgramme }) {
+  return <>
+    <section className="attention-panel"><div><span className="eyebrow">ROZHODOVACÍ PODPORA</span><h2>Vyžaduje pozornost</h2><p className="section-caption">Signály k dalšímu posouzení, nikoli automatické hodnocení programu.</p></div><span className="attention-mark">!</span><div className="attention-items"><span>2 otevřená zjištění</span><span>1 opatření po termínu</span><span>Pravidelné hodnocení programu: 2027</span><span>Verze 4 připravována pro 2030/2031</span><span>3 požadavky bez dostatečných důkazů</span></div></section>
+    <div className="overview-grid"><Metric label="Aktivní verze" value={`Verze ${programme.activeVersion}`} teal /><Metric label="Stav programu" value="Aktivní" /><Metric label="Platnost od" value={programme.validFrom} /><Metric label="Nejbližší hodnocení" value={programme.nextReview} /><Metric label="Otevřená opatření" value={String(programme.openActions)} /><Metric label="Aktivní akreditační proces" value={programme.activeAccreditation} /></div>
+    <div className="overview-lower"><section className="section-panel"><div className="section-panel-header"><div><h2>Životní cyklus programu</h2><span className="section-caption">Aktuální fáze: {programme.currentPhase}</span></div><StatusBadge status="ACTIVE" /></div><div className="lifecycle">{phases.map((phase) => <div className={`phase ${phase === programme.currentPhase ? 'current' : ''}`} key={phase}><div className="phase-dot" />{phase}</div>)}</div></section><section className="section-panel"><div className="section-panel-header"><div><h2>Kvalita programu</h2><span className="section-caption">Indikátory pro rozhodovací podporu</span></div><span className="section-caption">2026</span></div><div className="indicator-list"><div className="indicator"><span className="indicator-name">Studijní neúspěšnost</span><span className="indicator-value">18 %</span></div><div className="indicator"><span className="indicator-name">Spokojenost studentů</span><span className="indicator-value">4.2 / 5</span></div><div className="indicator"><span className="indicator-name">Uplatnění absolventů</span><span className="indicator-value">94 %</span></div><div className="indicator"><span className="indicator-name">Otevřená zjištění</span><span className="indicator-value">2</span></div><div className="indicator"><span className="indicator-name">Otevřená opatření</span><span className="indicator-value">3</span></div></div><p className="decision-note"><strong>Rozhodovací podpora:</strong> indikátory poskytují podklady pro hodnocení, samy neurčují kvalitu programu.</p></section></div>
+  </>
+}

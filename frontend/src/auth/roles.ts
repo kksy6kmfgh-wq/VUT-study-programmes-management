@@ -1,0 +1,4 @@
+export type Role = 'GARANT_SP' | 'KOORDINATOR_SP' | 'CLEN_RADY_SP' | 'HODNOTITEL_PS' | 'PREDSEDA_PS' | 'CLEN_RVH' | 'PRACOVNIK_ODBORU_KVALITY' | 'FAKULTNI_KOORDINATOR_KVALITY' | 'VEDENI_FAKULTY' | 'VEDENI_UNIVERZITY' | 'EXTERNI_AUDITOR' | 'ADMIN'
+export type ScopeType = 'GLOBAL' | 'FACULTY' | 'STUDY_PROGRAMME' | 'PROGRAMME_VERSION' | 'ACCREDITATION_PROCESS' | 'QUALITY_REVIEW' | 'AUDIT'
+export type RoleAssignment = { id: string; userId: string; role: Role; scopeType: ScopeType; scopeId?: string; validFrom?: string; validTo?: string }
+export type MockUser = { id: string; name: string; initials: string; assignments: RoleAssignment[] }

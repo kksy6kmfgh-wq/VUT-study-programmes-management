@@ -1,0 +1,4 @@
+import type { Role, ScopeType } from '../auth/roles'
+
+export const roleLabels: Record<Role, string> = { GARANT_SP: 'Garant studijního programu', KOORDINATOR_SP: 'Koordinátor studijního programu', CLEN_RADY_SP: 'Člen rady studijního programu', HODNOTITEL_PS: 'Hodnotitel pracovní skupiny', PREDSEDA_PS: 'Předseda pracovní skupiny', CLEN_RVH: 'Člen RVH', PRACOVNIK_ODBORU_KVALITY: 'Pracovník odboru kvality', FAKULTNI_KOORDINATOR_KVALITY: 'Fakultní koordinátor kvality', VEDENI_FAKULTY: 'Vedení fakulty', VEDENI_UNIVERZITY: 'Vedení univerzity', EXTERNI_AUDITOR: 'Externí auditor', ADMIN: 'Administrátor systému' }
+export const scopeLabels: Record<ScopeType, string> = { GLOBAL: 'Celá univerzita', FACULTY: 'Fakulta', STUDY_PROGRAMME: 'Studijní program', PROGRAMME_VERSION: 'Verze programu', ACCREDITATION_PROCESS: 'Akreditační proces', QUALITY_REVIEW: 'Hodnocení kvality', AUDIT: 'Auditní rozsah' }

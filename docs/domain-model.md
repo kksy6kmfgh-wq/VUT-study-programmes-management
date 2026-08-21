@@ -710,3 +710,69 @@ and Verifications may occur in multiples over time.
 9. The system can reconstruct the chain Requirement -> Evidence ->
    Assessment -> Finding -> Action -> Verification.
 10. The shared quality-management core remains usable beyond accreditation.
+
+## 18. Role-aware access model
+
+Access to the system is contextual and scoped. It is not a simple model in
+which every User has exactly one permanent Role.
+
+The conceptual relationship is:
+
+```text
+User
+    1:N
+RoleAssignment
+```
+
+A RoleAssignment contains:
+
+- `user_id`
+- `role`
+- `scope_type`
+- `scope_id`
+- `valid_from`
+- `valid_to`
+
+Conceptually, access is determined by:
+
+```text
+User
+    + RoleAssignment
+    + Scope
+    + Permission
+    + Validity
+```
+
+The same user may hold several assignments at once. For example, a person
+may be a GARANT_SP for StudyProgramme N-PI and also a CLEN_RADY_SP for that
+same programme, while separately holding a global quality-office assignment.
+Another person may be a HODNOTITEL_PS within one AccreditationProcess, and an
+EXTERNI_AUDITOR may have a time-limited AUDIT scope for one explicitly
+assigned audit.
+
+Supported conceptual scope types include:
+
+- `GLOBAL`
+- `FACULTY`
+- `STUDY_PROGRAMME`
+- `PROGRAMME_VERSION`
+- `ACCREDITATION_PROCESS`
+- `QUALITY_REVIEW`
+- `AUDIT`
+
+This is scoped, contextual access control rather than simple single-role
+RBAC. Role, scope, permissions and validity determine the working
+perspective. External assignments expose only their explicitly granted
+scope.
+
+Academic ownership, review, process administration and formal
+decision-making are separate responsibilities. The architecture therefore
+preserves:
+
+```text
+EDITING != RESPONSIBILITY != ASSESSMENT != DECISION
+```
+
+One role must not implicitly gain another role's authority. User, Role and
+RoleAssignment persistence tables are not defined yet; this section is the
+conceptual boundary for future authorization design.

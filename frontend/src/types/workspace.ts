@@ -1,0 +1,5 @@
+export type AttentionItem = { title: string; detail: string; tone: 'warning' | 'neutral' }
+export type AccreditationPortfolioItem = { programme: string; code: string; version: string; processType: string; regime: string; status: string; step: string; responsible: string; due: string; decision: string }
+export type QualityPortfolioItem = { programme: string; code: string; lastReview: string; nextReview: string; evidence: string; findings: number; actions: number; state: string; needsEvidence: boolean }
+export type GlobalAction = { programme: string; code: string; title: string; finding: string; responsible: string; due: string; status: 'OPEN' | 'OVERDUE' | 'COMPLETED'; implementation: 'NOT_VERIFIED' | 'VERIFIED'; effectiveness: 'NOT_VERIFIED' | 'VERIFIED'; closure: 'OPEN' | 'CLOSED' }
+export type ProjectMilestone = { title: string; state: 'DONE' | 'IN_PROGRESS' | 'PLANNED' }

@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
@@ -15,6 +16,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ...db.base import Base
 from .enums import ProgrammeVersionStatus
+
+if TYPE_CHECKING:
+    from ..accreditation.models import AccreditationProcess
 
 
 class StudyProgramme(Base):
@@ -79,4 +83,9 @@ class ProgrammeVersion(Base):
 
     study_programme: Mapped[StudyProgramme] = relationship(
         back_populates="versions",
+    )
+
+    accreditation_processes: Mapped[list["AccreditationProcess"]] = relationship(
+        back_populates="programme_version",
+        passive_deletes=True,
     )

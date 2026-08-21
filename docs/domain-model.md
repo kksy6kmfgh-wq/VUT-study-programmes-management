@@ -311,3 +311,171 @@ programme-quality modules.
 The architecture must support a closed quality loop and institutional
 memory. It should later allow traceability from a Requirement through
 Evidence, Assessment, Finding and Action to Verification and Closure.
+
+## 10. Accreditation process model
+
+### AccreditationProcess
+
+AccreditationProcess represents an internal VUT approval or accreditation
+process concerning one specific ProgrammeVersion. It contains process
+metadata and does not own or duplicate programme content.
+
+Programme content such as the programme name, graduate profile, programme
+learning outcomes, curriculum, study plan and programme structure belongs to
+ProgrammeVersion. AccreditationProcess references that version and must not
+copy those data.
+
+The relationship is:
+
+```text
+StudyProgramme
+     1:N
+ProgrammeVersion
+     1:N
+AccreditationProcess
+```
+
+A ProgrammeVersion may therefore pass through more than one approval or
+accreditation process over its lifetime when necessary.
+
+### Process type
+
+AccreditationProcess has the conceptual attribute `process_type`. Its
+initial values are:
+
+- `NEW_PROGRAMME`
+- `REACCREDITATION`
+- `PROGRAMME_CHANGE`
+
+`process_type` describes what is happening to the programme or version. The
+model does not yet define detailed categories of programme changes; those
+may be added later if required by VUT governance or legislation.
+
+### Approval regime
+
+AccreditationProcess also has the separate conceptual attribute
+`approval_regime`. Its initial values are:
+
+- `INSTITUTIONAL`
+- `EXTERNAL_NAU`
+
+`approval_regime` describes under which approval or accreditation regime the
+process is conducted. `process_type` and `approval_regime` are intentionally
+separate: for example, a `NEW_PROGRAMME` may be approved internally under
+institutional accreditation or may require external accreditation by NAU.
+
+### Process lifecycle metadata
+
+AccreditationProcess should conceptually contain:
+
+- `id`
+- `programme_version_id`
+- `process_type`
+- `approval_regime`
+- `status`
+- `started_at`
+- `submitted_at`
+- `decided_at`
+- `external_reference`
+
+The detailed status enum is deliberately not defined yet. Process status
+describes workflow or process progress, not the substantive decision. A
+decision must not be encoded into a workflow status such as
+`RVH_APPROVED`.
+
+## 11. Accreditation workflow
+
+AccreditationProcess uses the shared workflow and review infrastructure. The
+workflow is reusable and configurable; its exact stages must not be
+hard-coded into AccreditationProcess.
+
+```text
+AccreditationProcess
+          |
+          v
+      Workflow
+          |
+          +-- faculty-level preparation/review
+          +-- review panel / expert assessment
+          +-- RVH
+          +-- external NAU stage where applicable
+```
+
+Depending on the configured process, Workflow may produce Reviews,
+Assessments, Findings and Actions. These reuse the shared quality-management
+concepts already defined in this document. Accreditation must not create
+separate copies of Finding, Action, Evidence, Assessment or Verification.
+
+## 12. Decision
+
+Decision is a concept separate from `AccreditationProcess.status`. It
+represents a formal decision made by an authorised body.
+
+Decision should conceptually contain:
+
+- `id`
+- `accreditation_process_id`
+- `authority`
+- `decision_type`
+- `decided_at`
+- `valid_until`
+- `conditions`
+- `reference`
+
+Detailed authority and decision-type enums are not defined yet. A process
+may contain more than one Decision where appropriate, for example an
+internal RVH decision followed by an external NAU decision.
+
+```text
+PROCESS STATUS != DECISION
+```
+
+Process status describes where the case is in the workflow. Decision records
+what an authorised body formally decided. Decisions are therefore separately
+auditable records rather than alternative workflow statuses.
+
+## 13. Accreditation and programme lifecycle
+
+The conceptual flow is:
+
+```text
+StudyProgramme
+        |
+ProgrammeVersion
+        |
+AccreditationProcess
+        |
+Workflow / Reviews / Assessments
+        |
+Findings
+        |
+Actions
+        |
+Decision
+        |
+ProgrammeVersion lifecycle transition
+```
+
+An approval or accreditation Decision may enable a ProgrammeVersion to move
+to an approved or active lifecycle state. The decision history remains
+separately auditable and preserves the reasoning and process context for
+that transition.
+
+## 14. Accreditation architecture principles
+
+1. Accreditation is a quality gate in the programme lifecycle, not the
+    central entity of the system.
+2. ProgrammeVersion remains the single source of truth for programme
+    content.
+3. AccreditationProcess contains process metadata, not duplicated programme
+    content.
+4. Workflow is reusable infrastructure and must not be hard-coded
+    specifically for accreditation.
+5. Decisions are auditable records separate from process status.
+6. Findings, Actions, Evidence, Assessments and Verification remain shared
+    quality-management concepts.
+7. The architecture supports both institutional accreditation and external
+    NAU accreditation.
+8. The architecture preserves institutional memory and allows reconstruction
+    of which version was assessed, by whom, under which regime, with what
+    findings, actions and decisions.

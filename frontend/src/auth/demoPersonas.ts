@@ -14,10 +14,10 @@ export type DemoPersona = {
 export const demoPersonas: DemoPersona[] = [
   {
     id: 'pavel-quality',
-    name: 'Pavel Lošák',
-    email: 'pavel.losak@vut.cz',
+    name: 'Alan Turing',
+    email: 'alan.turing@vut-demo.cz',
     institution: 'VUT · Rektorát',
-    initials: 'PL',
+    initials: 'AT',
     title: 'Pracovník odboru kvality',
     assignment: { id: 'pavel-quality-assignment', userId: 'pavel-quality', role: 'PRACOVNIK_ODBORU_KVALITY', scopeType: 'GLOBAL' },
   },

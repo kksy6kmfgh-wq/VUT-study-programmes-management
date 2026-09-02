@@ -55,7 +55,7 @@ export function AssignedProcessPage({ persona, workspace }: { persona: DemoPerso
             <span>{process.programmeCode}</span>
             <b>{process.title}</b>
             <small>{process.processType}</small>
-            <em>{openRequests ? `${openRequests} položka/y k doplnění` : process.status === 'COMPLETED' ? 'Dokončeno' : current?.personaId === persona.id ? 'Čeká na vás' : `U: ${current?.roleLabel ?? '—'}`}</em>
+            <em>{openRequests ? `${openRequests} položka/y k doplnění` : process.status === 'COMPLETED' ? 'Uzavřeno' : current?.personaId === persona.id ? 'Čeká na vás' : `U: ${current?.roleLabel ?? '—'}`}</em>
           </button>
         })}
       </aside>
@@ -63,11 +63,11 @@ export function AssignedProcessPage({ persona, workspace }: { persona: DemoPerso
       {selected && <section className="assigned-process-detail">
         <div className="process-detail-head">
           <div><span>{selected.processType}</span><h2>{selected.title}</h2><p>{selected.programmeCode} · {selected.scope}</p></div>
-          <div className={isMyTurn || myOpenRequests.length ? 'turn-badge active' : 'turn-badge'}>{myOpenRequests.length ? `${myOpenRequests.length} položka/y vráceny k doplnění` : selected.status === 'COMPLETED' ? 'Proces dokončen' : isMyTurn ? 'Nyní jste na řadě' : `Aktuální krok: ${step?.roleLabel ?? '—'}`}</div>
+          <div className={isMyTurn || myOpenRequests.length ? 'turn-badge active' : 'turn-badge'}>{myOpenRequests.length ? `${myOpenRequests.length} položka/y vráceny k doplnění` : selected.status === 'COMPLETED' ? 'Proces uzavřen' : isMyTurn ? 'Nyní jste na řadě' : `Aktuální krok: ${step?.roleLabel ?? '—'}`}</div>
         </div>
 
         <div className="mini-workflow">
-          {selected.workflow.map((flowStep, index) => <div key={flowStep.id} className={index < selected.currentStepIndex ? 'done' : index === selected.currentStepIndex ? 'current' : ''}>
+          {selected.workflow.map((flowStep, index) => <div key={flowStep.id} className={selected.status === 'COMPLETED' && index <= selected.currentStepIndex ? 'done' : index < selected.currentStepIndex ? 'done' : index === selected.currentStepIndex ? 'current' : ''}>
             <b>{index + 1}</b><span>{flowStep.title}</span><small>{flowStep.roleLabel}</small>
           </div>)}
         </div>

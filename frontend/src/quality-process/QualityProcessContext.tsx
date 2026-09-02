@@ -105,6 +105,11 @@ export type ProcessDraft = {
   processType: string
   scope: string
   programmeCode: string
+  programmeName?: string
+  faculty?: string
+  facultyName?: string
+  cooperatingFaculties?: string[]
+  academicYear?: string
   participants: ProcessParticipant[]
   workflow: ProcessFlowStep[]
   questions: ProcessQuestion[]
@@ -185,6 +190,8 @@ function nowLabel() {
 
 function normalizeProcess(process: QualityProcess): QualityProcess {
   const originalWorkflow = process.workflow ?? []
+  const inferredFaculty = process.faculty || (process.scope?.match(/·\s*([A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{2,8})\s*$/)?.[1] ?? 'VUT')
+  const inferredProgrammeName = process.programmeName || process.scope?.split('·')?.[1]?.trim() || process.programmeCode
   const hasSecretaryStep = originalWorkflow.some((step) => step.personaId === 'sofia-kovalevskaya')
   const lastStep = originalWorkflow.at(-1)
   const shouldMigrateLegacyFinalStep = !hasSecretaryStep && Boolean(lastStep) && (
@@ -220,6 +227,11 @@ function normalizeProcess(process: QualityProcess): QualityProcess {
   ]
   return {
     ...process,
+    faculty: inferredFaculty,
+    facultyName: process.facultyName || inferredFaculty,
+    programmeName: inferredProgrammeName,
+    cooperatingFaculties: process.cooperatingFaculties ?? [],
+    academicYear: process.academicYear || '',
     workflow,
     participants,
     answerHistory: process.answerHistory ?? {},

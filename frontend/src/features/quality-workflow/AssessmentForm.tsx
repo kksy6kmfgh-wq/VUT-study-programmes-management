@@ -1,0 +1,6 @@
+import { useState } from 'react'
+import { useQualityCase } from '../../quality-workflow/QualityCaseContext'
+import type { AssessmentResult } from '../../types/studyProgramme'
+import { resultLabels } from '../../presentation/labels'
+
+export function AssessmentForm({ actor }: { actor: string }) { const { saveAssessment } = useQualityCase(); const [result, setResult] = useState<AssessmentResult>('PARTIALLY_FULFILLED'); const [comment, setComment] = useState('Zpětná vazba je sbírána, ale studenti dlouhodobě požadují vyšší podíl projektově orientované výuky.'); return <form className="workflow-form" onSubmit={(event) => { event.preventDefault(); saveAssessment({ result, comment, assessor: actor, assessedAt: '2027-01-15' }, actor) }}><h3>Hodnocení požadavku H11</h3><label>Výsledek<select value={result} onChange={(event) => setResult(event.target.value as AssessmentResult)}>{Object.entries(resultLabels).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select></label><label>Komentář<textarea value={comment} onChange={(event) => setComment(event.target.value)} /></label><button className="primary-button" type="submit">Uložit hodnocení</button></form> }

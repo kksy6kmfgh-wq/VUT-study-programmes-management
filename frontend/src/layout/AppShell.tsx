@@ -1,28 +1,142 @@
-import type { ReactNode } from 'react'
-import type { Role, RoleAssignment } from '../auth/roles'
-import { roleLabels, scopeLabels } from '../presentation/roleLabels'
+import { useEffect, useState, type ReactNode } from 'react'
+import type { Role } from '../auth/roles'
+import type { DemoPersona } from '../auth/demoPersonas'
+import { scopeLabels } from '../presentation/roleLabels'
+import { QualityWorkspacePage } from '../pages/QualityWorkspacePage'
+import { AssignedProcessPage } from '../pages/AssignedProcessPage'
 
-type AppShellProps = { activeSection: string; onNavigate: (section: string) => void; assignment: RoleAssignment; assignments: RoleAssignment[]; onRoleChange: (assignmentId: string) => void; children: ReactNode }
-const commonNavigation = [['▦', 'Přehled']]
-const roleNavigation: Record<Role, string[][]> = {
-  GARANT_SP: [...commonNavigation, ['◈', 'Můj program'], ['◌', 'Hodnocení kvality'], ['✓', 'Opatření'], ['▤', 'Dokumenty']],
-  KOORDINATOR_SP: [...commonNavigation, ['◈', 'Můj program'], ['▤', 'Dokumenty'], ['✓', 'Termíny']],
-  CLEN_RADY_SP: [...commonNavigation, ['◈', 'Studijní programy'], ['◌', 'Kvalita SP'], ['✓', 'Opatření']],
-  HODNOTITEL_PS: [...commonNavigation, ['◌', 'Moje hodnocení'], ['▤', 'Důkazy'], ['◇', 'Zjištění']],
-  PREDSEDA_PS: [...commonNavigation, ['◌', 'Pracovní skupina'], ['◇', 'Zjištění'], ['✓', 'Termíny']],
-  CLEN_RVH: [...commonNavigation, ['◇', 'Případy RVH'], ['▤', 'Podklady'], ['✓', 'Rozhodnutí']],
-  PRACOVNIK_ODBORU_KVALITY: [...commonNavigation, ['◈', 'Studijní programy'], ['◇', 'Akreditace'], ['◌', 'Kvalita SP'], ['✓', 'Opatření'], ['◒', 'Dashboard kvality'], ['▱', 'Projekty']],
-  FAKULTNI_KOORDINATOR_KVALITY: [...commonNavigation, ['◈', 'Studijní programy'], ['◇', 'Akreditace'], ['◌', 'Kvalita SP'], ['✓', 'Opatření']],
-  VEDENI_FAKULTY: [...commonNavigation, ['◈', 'Portfolio SP'], ['◒', 'Dashboard kvality'], ['◇', 'Akreditační horizont']],
-  VEDENI_UNIVERZITY: [...commonNavigation, ['◈', 'Portfolio SP'], ['◒', 'Dashboard kvality'], ['◇', 'Rizika'], ['▤', 'Strategické výstupy']],
-  EXTERNI_AUDITOR: [...commonNavigation, ['◈', 'Studijní program'], ['▤', 'Důkazy'], ['◌', 'Hodnocení'], ['◇', 'Zjištění'], ['▤', 'Dokumenty']],
-  ADMIN: [...commonNavigation, ['⚙', 'Uživatelé'], ['⚙', 'Role a oprávnění'], ['⚙', 'Konfigurace']],
+export type Workspace = 'PREPARATION' | 'REVIEW' | 'QUALITY'
+
+type AppShellProps = {
+  activeSection: string
+  onNavigate: (section: string) => void
+  persona: DemoPersona
+  personas: DemoPersona[]
+  onPersonaChange: (personaId: string) => void
+  children: ReactNode
 }
-const personaNames: Record<string, string> = { 'user-pavel': 'Pavel Lošák', jana: 'Jana Nováková', petr: 'Petr Svoboda', marie: 'Marie Dvořáková', anna: 'Anna Veselá', auditor: 'Externí auditor', admin: 'Administrátor' }
 
-export function AppShell({ activeSection, onNavigate, assignment, assignments, onRoleChange, children }: AppShellProps) {
-  const navigation = roleNavigation[assignment.role]
-  const assignmentOptions = assignments.filter((item, index, items) => items.findIndex((candidate) => candidate.role === item.role) === index)
-  const displayName = personaNames[assignment.userId] ?? 'Pavel Lošák'
-  return <div className="app-shell"><header className="topbar"><div className="brand"><div className="brand-mark">V</div><div><div className="brand-title">VUT · Řízení kvality studijních programů</div><div className="brand-subtitle">Brno University of Technology · interní pracovní prostor</div></div></div><div className="user-area"><div className="role-switcher"><span className="user-name">{displayName}</span><select value={assignment.id} onChange={(event) => onRoleChange(event.target.value)} aria-label="Prototypová role"><option value={assignment.id}>{roleLabels[assignment.role]}</option>{assignmentOptions.filter((item) => item.id !== assignment.id).map((item) => <option value={item.id} key={item.id}>{roleLabels[item.role]}</option>)}</select><small>{scopeLabels[assignment.scopeType]}{assignment.scopeId ? ` · ${assignment.scopeId}` : ''}</small></div><span className="user-avatar">{displayName === 'Externí auditor' ? 'EA' : displayName === 'Administrátor' ? 'AD' : 'PL'}</span></div></header><div className="app-body"><aside className="sidebar"><div className="nav-label">HLAVNÍ NAVIGACE</div><nav className="nav-list" aria-label="Hlavní navigace">{navigation.map(([icon, label]) => <button className={`nav-item ${activeSection === label ? 'active' : ''}`} key={label} type="button" onClick={() => onNavigate(label)}><span className="nav-icon" aria-hidden="true">{icon}</span>{label}</button>)}</nav><div className="sidebar-note"><strong>{roleLabels[assignment.role]}</strong>{scopeLabels[assignment.scopeType]}{assignment.scopeId ? ` · ${assignment.scopeId}` : ''}<br />Role, scope a oprávnění určují pracovní perspektivu.</div></aside><main className="main-content">{children}</main></div></div>
+const workspaceLabels: Record<Workspace, string> = {
+  PREPARATION: 'Příprava a správa SP',
+  REVIEW: 'Hodnocení SP',
+  QUALITY: 'Řízení kvality VUT',
+}
+
+const workspaceShortLabels: Record<Workspace, string> = {
+  PREPARATION: 'Příprava',
+  REVIEW: 'Hodnocení',
+  QUALITY: 'Řízení kvality',
+}
+
+const allowedWorkspaces = (role: Role): Workspace[] => {
+  if (role === 'PRACOVNIK_ODBORU_KVALITY' || role === 'ADMIN' || role === 'VEDENI_UNIVERZITY' || role === 'CLEN_RVH') return ['QUALITY']
+  if (role === 'HODNOTITEL_PS' || role === 'PREDSEDA_PS' || role === 'EXTERNI_AUDITOR') return ['REVIEW']
+  if (role === 'GARANT_SP') return ['PREPARATION', 'QUALITY']
+  if (role === 'KOORDINATOR_SP' || role === 'VEDENI_FAKULTY') return ['PREPARATION']
+  if (role === 'CLEN_RADY_SP' || role === 'FAKULTNI_KOORDINATOR_KVALITY') return ['QUALITY']
+  return ['PREPARATION']
+}
+
+const navigationFor = (workspace: Workspace, role: Role): string[][] => {
+  if (workspace === 'QUALITY' && role === 'GARANT_SP') return [
+    ['■', 'Přehled kvality SP'],
+    ['◆', 'Rada SP'],
+    ['◒', 'Roční evaluace'],
+    ['◆', 'Akreditace a rozhodnutí'],
+    ['✓', 'Zjištění a opatření'],
+    ['▤', 'Historie'],
+  ]
+  if (workspace === 'QUALITY' && (role === 'VEDENI_UNIVERZITY' || role === 'CLEN_RVH')) return [
+    ['■', 'Přehled'],
+    ['◆', 'Procesy'],
+    ['✓', 'Podklady RVH'],
+    ['▱', 'Portfolio SP'],
+  ]
+  if (workspace === 'QUALITY') return [
+    ['■', 'Přehled'],
+    ['◆', 'Procesy'],
+    ['▤', 'Návrhář procesů'],
+    ['▥', 'Knihovna formulářů'],
+    ['◷', 'Termíny a workflow'],
+    ['◎', 'Hodnotitelé'],
+    ['◌', 'Připomínky'],
+    ['✓', 'Podklady RVH'],
+    ['▱', 'Portfolio SP'],
+    ['▣', 'Archiv'],
+    ['◉', 'Externí přístupy'],
+  ]
+  if (workspace === 'REVIEW') return [
+    ['■', 'Přehled'],
+    ...(role === 'EXTERNI_AUDITOR' ? [['▣', 'Archiv']] : []),
+    ['✓', 'Přidělená hodnocení'],
+    ['▤', 'Registr důkazů'],
+    ['◇', 'Zjištění'],
+  ]
+  return [
+    ['■', 'Přehled'],
+    ['◆', 'Přidělené procesy'],
+    ['◇', 'Můj program'],
+    ['▤', 'Registr důkazů'],
+    ['◒', 'Roční hodnocení SP'],
+    ['✓', 'Opatření'],
+  ]
+}
+
+export function AppShell({ activeSection, onNavigate, persona, personas, onPersonaChange, children }: AppShellProps) {
+  const available = allowedWorkspaces(persona.assignment.role)
+  const [workspace, setWorkspace] = useState<Workspace>(available[0])
+
+  useEffect(() => {
+    const next = allowedWorkspaces(persona.assignment.role)[0]
+    setWorkspace(next)
+    const firstNavigation = navigationFor(next, persona.assignment.role)[0]
+    if (firstNavigation) onNavigate(firstNavigation[1])
+  }, [persona.id])
+
+  const navigation = navigationFor(workspace, persona.assignment.role)
+
+  const changeWorkspace = (nextWorkspace: Workspace) => {
+    if (!available.includes(nextWorkspace)) return
+    setWorkspace(nextWorkspace)
+    const nextNavigation = navigationFor(nextWorkspace, persona.assignment.role)
+    if (nextNavigation[0]) onNavigate(nextNavigation[0][1])
+  }
+
+  const shouldShowAssignedProcessPage = workspace === 'PREPARATION'
+    ? activeSection === 'Přehled' || activeSection === 'Přidělené procesy'
+    : workspace === 'REVIEW'
+      ? activeSection === 'Přehled' || activeSection === 'Přidělená hodnocení'
+      : false
+
+  return <div className="app-shell vut-shell">
+    <header className="vut-topbar">
+      <div className="vut-logo-block" aria-label="Vysoké učení technické v Brně"><span className="vut-symbol" aria-hidden="true">T</span><strong>VUT</strong></div>
+      <div className="vut-app-name"><strong>Systém řízení kvality</strong><span>Vzdělávání · Studijní programy</span></div>
+
+      <nav className="vut-portal-nav" aria-label="Pracovní prostředí">
+        {(Object.keys(workspaceLabels) as Workspace[]).filter((item) => available.includes(item)).map((item) => <button type="button" key={item} className={workspace === item ? 'active' : ''} onClick={() => changeWorkspace(item)} title={workspaceLabels[item]}><span className="workspace-mark" aria-hidden="true">{item === 'PREPARATION' ? '▤' : item === 'REVIEW' ? '✓' : '◆'}</span><span className="workspace-title">{workspaceShortLabels[item]}</span></button>)}
+      </nav>
+
+      <div className="vut-user-tools demo-user-switcher">
+        <label><span>Přihlášený uživatel</span><select value={persona.id} onChange={(event) => onPersonaChange(event.target.value)}>{personas.map((item) => <option value={item.id} key={item.id}>{item.name} · {item.title}</option>)}</select></label>
+        <span className="demo-persona-badge">{persona.external ? 'EXTERNÍ' : 'VUT'}</span>
+      </div>
+    </header>
+
+    <div className="vut-contextbar"><span className="context-root">VUT</span><span aria-hidden="true">/</span><strong>{workspaceLabels[workspace]}</strong><span className="vut-context-scope">{persona.name} · {scopeLabels[persona.assignment.scopeType]}{persona.assignment.scopeId ? ` · ${persona.assignment.scopeId}` : ''}</span></div>
+
+    <div className="app-body">
+      <aside className="sidebar vut-sidebar">
+        <div className="vut-menu-search">⌕&nbsp;&nbsp; Hledat v menu...</div>
+        <div className="nav-label">PRACOVNÍ PROSTŘEDÍ</div>
+        <nav className="nav-list" aria-label="Hlavní navigace">{navigation.map(([icon, label]) => <button className={`nav-item ${activeSection === label ? 'active' : ''}`} key={label} type="button" onClick={() => onNavigate(label)}><span className="nav-icon" aria-hidden="true">{icon}</span><span>{label}</span></button>)}</nav>
+        <div className="vut-sidebar-section">KONTEXT</div>
+        <div className="vut-sidebar-context"><strong>{persona.title}</strong><span>{persona.name}</span><span>{persona.institution}</span><span>{scopeLabels[persona.assignment.scopeType]}</span>{persona.assignment.scopeId && <span>{persona.assignment.scopeId}</span>}</div>
+      </aside>
+
+      <main className="main-content">
+        {workspace === 'QUALITY' ? <QualityWorkspacePage persona={persona} section={activeSection} /> : workspace === 'REVIEW' && activeSection === 'Archiv' ? <QualityWorkspacePage persona={persona} section="Archiv" /> : shouldShowAssignedProcessPage ? <AssignedProcessPage persona={persona} workspace={workspace} /> : children}
+      </main>
+    </div>
+  </div>
 }

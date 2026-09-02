@@ -776,3 +776,23 @@ EDITING != RESPONSIBILITY != ASSESSMENT != DECISION
 One role must not implicitly gain another role's authority. User, Role and
 RoleAssignment persistence tables are not defined yet; this section is the
 conceptual boundary for future authorization design.
+
+## 19. Quality-loop closure and separation of duties
+
+Quality-loop closure requires Verification. Completing an Action alone does
+not close the related Finding or quality case.
+
+Verification should be independent from the actor responsible for the
+Action where governance requires separation of duties. Implementation and
+effectiveness are separate verification questions and must remain auditable
+independently.
+
+The architecture therefore preserves:
+
+```text
+ACTION COMPLETION != EFFECTIVENESS VERIFICATION != CLOSURE
+```
+
+Closure remains a derived or controlled state, not a separate Closure entity.
+The full Requirement, Evidence, Assessment, Finding, Action and Verification
+history remains available after closure.

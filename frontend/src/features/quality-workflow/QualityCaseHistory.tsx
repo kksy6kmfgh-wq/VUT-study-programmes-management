@@ -1,0 +1,2 @@
+import type { QualityCaseHistory as HistoryItem } from '../../quality-workflow/qualityCaseTypes'
+export function QualityCaseHistory({ history }: { history: HistoryItem[] }) { return <div className="workflow-history">{history.map((item, index) => <div className="workflow-history-item" key={`${item.date}-${index}`}><time>{item.date}</time><span /><div><strong>{item.actor}</strong><p>{item.event}</p></div></div>)}</div> }
